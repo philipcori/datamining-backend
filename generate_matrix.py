@@ -1,5 +1,5 @@
 from scipy import spatial
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, SpectralClustering
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from matrix_visualizer import MatrixVisualizer
@@ -9,7 +9,7 @@ class MatrixClusterGenerator():
     def __init__(self):
         self.visualizer = MatrixVisualizer()
 
-    def generate_matrix(self, json):
+    def generate_matrix(self, json, isKmeans):
         print('generating matrix...')
         # get all the text
 
@@ -18,7 +18,7 @@ class MatrixClusterGenerator():
 
         # get json keys as list of strings
         doc_names = list(json.keys())
-
+        num_keys = len(doc_names)
         print(doc_names)
         # print(list())
 
@@ -32,12 +32,14 @@ class MatrixClusterGenerator():
         # fit the vectorizer to the text
         X = vectorizer.fit_transform(text)
 
-        kmeans = KMeans(n_clusters=5, init='k-means++', max_iter=100, random_state=0)
-
+        if isKmeans:
+            clusterer = KMeans(n_clusters=min(num_keys, 5), init='k-means++', max_iter=100, random_state=0)
+        else:
+            clusterer = SpectralClustering(n_clusters=min(num_keys, 5), eigen_solver='arpack', affinity="nearest_neighbors")
         print('clustering...')
-        kmeans.fit(X)
+        clusterer.fit(X)
 
-        labels = kmeans.labels_
+        labels = clusterer.labels_
         # sort labels in ascending order
         labels.sort()
         X = self.sort_X_by_label(X.toarray(), labels)

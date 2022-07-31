@@ -31,6 +31,8 @@ def echo():
 @app.route('/getMatrix', methods = ['GET', 'POST'])
 @cross_origin()
 def generate_doc_matrix():
+    isKmeans = request.args.get('isKmeans')
+    isKmeans = True if isKmeans == "True" else False
     if 'file' not in request.files:
         resp = make_response('No file part')
         return resp
@@ -46,12 +48,10 @@ def generate_doc_matrix():
     # convert to json
     json_data = json.loads(file_content)
 
-    url = matrix_generator.generate_matrix(json_data)
+    url = matrix_generator.generate_matrix(json_data, isKmeans)
 
     resp = make_response(url)
     return resp
-
-
 
 
 
