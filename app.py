@@ -3,6 +3,7 @@ import json
 from flask import Flask, request, make_response
 from flask_cors import CORS, cross_origin
 import logging
+import sys
 
 from generate_matrix import MatrixClusterGenerator
 
@@ -33,6 +34,7 @@ def echo():
 def generate_doc_matrix():
     isKmeans = request.args.get('isKmeans')
     isKmeans = True if isKmeans == "True" else False
+    print(request.files, file=sys.stdout)
     if 'file' not in request.files:
         resp = make_response('No file part')
         return resp
@@ -40,11 +42,13 @@ def generate_doc_matrix():
 
     # check file is json file
     if file.content_type != 'application/json':
-        resp = make_response('File type not supported')
+        resp = make_response('File type not supported', 400)
         return resp
 
     # get file content
     file_content = file.read()
+
+    # print(file_content, file=sys.stdout)
     # convert to json
     json_data = json.loads(file_content)
 
